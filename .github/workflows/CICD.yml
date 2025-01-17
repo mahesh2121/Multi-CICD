@@ -4,6 +4,8 @@ on:
   push:
     branches:
     - main
+    - dev
+    - staging
 
 jobs:
   deploy:
@@ -19,9 +21,42 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
         docker-compose --version
 
-    - name: Run deployment script
+    - name: Run linting and formatting (Dev)
+      if: github.ref == 'refs/heads/dev'
+      run: |
+        echo "Running linting and formatting..."
+        # Example linting commands
+        npm install
+        npm run lint
+
+    - name: Run staging tests (Staging)
+      if: github.ref == 'refs/heads/staging'
+      run: |
+        echo "Running tests for staging..."
+        # Example testing commands
+        npm install
+        npm run test
+
+    - name: Deploy to Production
+      if: github.ref == 'refs/heads/main'
       run: |
         chmod +x ./deploy.sh
         ./deploy.sh
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+    - name: Deploy to Development
+      if: github.ref == 'refs/heads/dev'
+      run: |
+        chmod +x ./deploy-dev.sh
+        ./deploy-dev.sh
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+    - name: Deploy to Staging
+      if: github.ref == 'refs/heads/staging'
+      run: |
+        chmod +x ./deploy-staging.sh
+        ./deploy-staging.sh
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
