@@ -1,9 +1,17 @@
+name: Deploy Web Application
+
+on:
+  push:
+    branches:
+    - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Set up Docker Compose
       run: |
@@ -11,5 +19,9 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
         docker-compose --version
 
-    - name: Deploy to dev
-      run: ./deploy.sh
+    - name: Run deployment script
+      run: |
+        chmod +x ./deploy.sh
+        ./deploy.sh
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
